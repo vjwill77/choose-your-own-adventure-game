@@ -65,6 +65,55 @@ public class MessagesTests
     }
 
     [TestMethod]
+    public void SetCurrentLanguage_SetsLanguageToItalian()
+    {
+        Messages messages = new Messages();
+        messages.SetCurrentLanguage("Italian");
+        Assert.AreEqual("Italian", messages.CurrentLanguage);
+    }
+
+    [TestMethod]
+    public void ReadDictionary_LoadsItalianWelcomeMessage()
+    {
+        Messages messages = new Messages();
+        messages.SetCurrentLanguage("Italian");
+        messages.ReadDictionary();
+        string result = messages.GetMessage("welcome");
+        Assert.AreEqual("Benvenuto nel Gioco Scegli la Tua Avventura", result);
+    }
+
+    [TestMethod]
+    public void Italian_AcceptsItalianRaceAndOccupationInput()
+    {
+        Messages messages = new Messages();
+        messages.SetCurrentLanguage("Italian");
+        messages.ReadDictionary();
+        Assert.AreEqual("Halfling", messages.NormalizeRace("Mezzuomo"));
+        Assert.AreEqual("Archer", messages.NormalizeOccupation("arciere"));
+        Assert.AreEqual("Nano", messages.TranslateRaceForDisplay("Dwarf"));
+        Assert.AreEqual("pugnale", messages.TranslateWeaponForDisplay("dagger"));
+    }
+
+    [TestMethod]
+    public void AllLanguages_HaveSameMessageKeysAsEnglish()
+    {
+        Messages english = new Messages();
+        english.ReadDictionary();
+        foreach (string language in new[] { "Spanish", "French", "Italian" })
+        {
+            Messages other = new Messages();
+            other.SetCurrentLanguage(language);
+            other.ReadDictionary();
+            foreach (string key in new[] { "welcome", "victory", "defeat", "retreat", "path_prompt_full",
+                                           "player_attack_intro", "dragon_attack_intro", "dragon_defense_taunt_3",
+                                           "dragon_damage_reply_4", "enter_choice" })
+            {
+                Assert.AreNotEqual($"[{key}]", other.GetMessage(key), $"{language} is missing '{key}'");
+            }
+        }
+    }
+
+    [TestMethod]
     public void GetMessage_ReturnsFallbackForUnknownKey()
     {
         Messages messages = new Messages();
